@@ -5,6 +5,12 @@ import re
 import shutil
 import os
 
+class default_config:
+    def __init__(self,language):
+        self.language = language
+
+default_settings = default_config(('fr', 'de'))
+
 #Function to copy files from source location to Destination
 def copy_files(language, file_path, sub_file_path, file_type, file_name):
     '''
@@ -60,8 +66,12 @@ if __name__ == '__main__':
     possible_languages = ['cs', 'de', 'es', 'fi', 'fr', 'hu', 'pl', 'pt-pt', 'pt', 'ru', 'zh-Hans', 'zh-Hant']
     user_language = 'lorem'
     #checking if user's choice of languages are valid
-    while user_language not in possible_languages and not set(user_language).issubset(set(possible_languages)):
-        user_language = input(f'Please choose a language(s) to bundle, separate using commas  \nLanguage: {possible_languages}\n')
+    while user_language not in possible_languages and not set(user_language).issubset(set(possible_languages)) and not '':
+        user_language = input(f'Press Enter to Bundle Default Languages:{default_settings.language}, or manually enter *separate using commas  \nLanguage: {possible_languages}\n')
+
+        if user_language == '':
+            user_language = default_settings.language
+            break
         #splitting up user input into a list and removing commas
         if ',' in user_language:
             while ' ' in user_language:
@@ -69,7 +79,7 @@ if __name__ == '__main__':
             user_language = user_language.split(',')
 
     #Checking if multiple languages need to be bundled
-    if type(user_language) == list:
+    if type(user_language) == list or type(user_language) == tuple:
         for language in user_language:
             bundle_language(language, user_file_path)
     

@@ -19,18 +19,18 @@ def bundle_language(language, file_path):
     #Creates new temporary folder to hold resx files
     os.mkdir(f'{file_path}/Design/Localization/Spira-{language}')
 
-    parent_folders = {}
-    for item in os.listdir(file_path):
-        parent_folders[item] = []
+    parent_folders = []
+    for folder in os.listdir(file_path):
+        parent_folders.append(folder)
 
-    for item in parent_folders:
-        if os.path.isdir(f'{file_path}/{item}'):
-            for file in os.listdir(f'{file_path}/{item}'):
-                if os.path.isdir(f'{file_path}/{item}/{file}'):
-                    for resx in os.listdir(f'{file_path}/{item}/{file}'):
+    for parent in parent_folders:
+        if os.path.isdir(f'{file_path}/{parent}'):
+            for folder in os.listdir(f'{file_path}/{parent}'):
+                if os.path.isdir(f'{file_path}/{parent}/{folder}'):
+                    for resx in os.listdir(f'{file_path}/{parent}/{folder}'):
                         if re.match(r"^[^.]*.resx[^.]*$", resx) or re.match(r"\w+\." + language + "\.resx", resx):
-                            shutil.copyfile(f'{file_path}/{item}/{file}/{resx}', f'{item}_{resx}')
-                            shutil.move(f'{item}_{resx}',f'{file_path}/Design/Localization/Spira-{language}')
+                            shutil.copyfile(f'{file_path}/{parent}/{folder}/{resx}', f'{parent}_{resx}')
+                            shutil.move(f'{parent}_{resx}',f'{file_path}/Design/Localization/Spira-{language}')
 
     #Zips the temporary folder (moves if not in right folder) and deletes the temporary folder
     shutil.make_archive(f'Spira-{language}', format='zip', root_dir=file_path+'/Design/Localization/Spira-'+language)
