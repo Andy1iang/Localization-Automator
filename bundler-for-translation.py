@@ -42,8 +42,9 @@ def bundle_language(language, file_path):
     for files in os.listdir(f'{file_path}/Common/Resources'):
         copy_files(language, file_path, '/Common/Resources', 'common', files)
 
-    #Zips the temporary folder and deletes the temporary folder
+    #Zips the temporary folder (moves if not in right folder) and deletes the temporary folder
     shutil.make_archive(f'Spira-{language}', format='zip', root_dir=file_path+'/Design/Localization/Spira-'+language)
+    shutil.move(f'Spira-{language}.zip',f'{file_path}/Design/Localization')
     shutil.rmtree(f'{file_path}/Design/Localization/Spira-{language}')
     print(f'{language} saved')
 
@@ -53,7 +54,7 @@ if __name__ == '__main__':
     #Validates user's input for their file path
     user_file_path = 'lorem'
     while not os.path.exists(user_file_path):
-        user_file_path = input('Please enter your file path, including SpiraTeam \nExample: /Users/andy/Desktop/Inflectra/Translation-Automator/SpiraTeam\n')
+        user_file_path = input('Please enter your file path, including SpiraTeam \nExample: /Users/andy/Desktop/Inflectra/SpiraTeam\n')
 
     #validates the user chose a valid language
     possible_languages = ['cs', 'de', 'es', 'fi', 'fr', 'hu', 'pl', 'pt-pt', 'pt', 'ru', 'zh-Hans', 'zh-Hant']
