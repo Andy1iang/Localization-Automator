@@ -5,6 +5,8 @@ import re
 import shutil
 import os
 
+#print(os.getcwd())
+
 class default_config:
     def __init__(self,language):
         self.language = language
@@ -50,7 +52,7 @@ def bundle_language(language, file_path):
 
     #Zips the temporary folder (moves if not in right folder) and deletes the temporary folder
     shutil.make_archive(f'Spira-{language}', format='zip', root_dir=file_path+'/Design/Localization/Spira-'+language)
-    shutil.move(f'Spira-{language}.zip',f'{file_path}/Design/Localization')
+    #shutil.move(f'Spira-{language}.zip',f'{file_path}/Design/Localization')
     shutil.rmtree(f'{file_path}/Design/Localization/Spira-{language}')
     print(f'{language} saved')
 
