@@ -51,8 +51,11 @@ def bundle_language(language, file_path):
         copy_files(language, file_path, '/Common/Resources', 'common', files)
 
     #Zips the temporary folder (moves if not in right folder) and deletes the temporary folder
+    if os.path.isfile(f'{file_path}/Design/Localization/Spira-{language}.zip'):
+        os.remove(f'{file_path}/Design/Localization/Spira-{language}.zip')
     shutil.make_archive(f'Spira-{language}', format='zip', root_dir=file_path+'/Design/Localization/Spira-'+language)
-    #shutil.move(f'Spira-{language}.zip',f'{file_path}/Design/Localization')
+    if not os.path.isfile(f'{file_path}/Design/Localization/Spira-{language}.zip'):
+        shutil.move(f'Spira-{language}.zip',f'{file_path}/Design/Localization')
     shutil.rmtree(f'{file_path}/Design/Localization/Spira-{language}')
     print(f'{language} saved')
 
