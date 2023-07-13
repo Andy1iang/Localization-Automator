@@ -5,19 +5,6 @@ import re
 import shutil
 import os
 
-#Function to copy files from source location to Destination
-def copy_files(language, file_path, sub_file_path, file_type, file_name):
-    '''
-    language: language selected by the user
-    file_path: user's file path to SpiraTeam
-    sub_file_path: File path from SpiraTeam to resx file folders
-    type: Folder the resx file is in
-    file_name: name of the file in original location
-    '''
-    if re.match(r"^[^.]*.resx[^.]*$", file_name) or re.match(r"\w+\." + language + "\.resx", file_name):
-        shutil.copyfile(f'{file_path}{sub_file_path}/{file_name}', f'{file_type}_{file_name}')
-        shutil.move(f'{file_type}_{file_name}',f'{file_path}/Design/Localization/Spira-{language}')
-
 #Function Create New Zip File with English and Chosen Language resx Files
 def bundle_language(language, file_path):
     '''
@@ -32,15 +19,18 @@ def bundle_language(language, file_path):
     #Creates new temporary folder to hold resx files
     os.mkdir(f'{file_path}/Design/Localization/Spira-{language}')
 
-    #Goes through three folders that hold resx files and calls copy_files function
-    for files in os.listdir(f'{file_path}/Business/GlobalResources'):
-        copy_files(language, file_path, '/Business/GlobalResources', 'business', files)
+    parent_folders = {}
+    for item in os.listdir(file_path):
+        parent_folders[item] = []
 
-    for files in os.listdir(f'{file_path}/SpiraTest/App_GlobalResources'):
-        copy_files(language, file_path, '/SpiraTest/App_GlobalResources', 'web', files)
-
-    for files in os.listdir(f'{file_path}/Common/Resources'):
-        copy_files(language, file_path, '/Common/Resources', 'common', files)
+    for item in parent_folders:
+        if os.path.isdir(f'{file_path}/{item}'):
+            for file in os.listdir(f'{file_path}/{item}'):
+                if os.path.isdir(f'{file_path}/{item}/{file}'):
+                    for resx in os.listdir(f'{file_path}/{item}/{file}'):
+                        if re.match(r"^[^.]*.resx[^.]*$", resx) or re.match(r"\w+\." + language + "\.resx", resx):
+                            shutil.copyfile(f'{file_path}/{item}/{file}/{resx}', f'{item}_{resx}')
+                            shutil.move(f'{item}_{resx}',f'{file_path}/Design/Localization/Spira-{language}')
 
     #Zips the temporary folder (moves if not in right folder) and deletes the temporary folder
     shutil.make_archive(f'Spira-{language}', format='zip', root_dir=file_path+'/Design/Localization/Spira-'+language)
