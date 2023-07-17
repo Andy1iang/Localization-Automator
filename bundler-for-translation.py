@@ -1,3 +1,6 @@
+'''
+This Python Script should be in the directory of SpiraTeam/Design/Localization
+'''
 #importing Regex (Part of Standard Libraries)
 import re
 
@@ -15,6 +18,7 @@ dir_path = os.path.abspath(os.path.join(sub_path, os.pardir)) #SpiraTeam Directo
 class default_config:
     def __init__(self): 
         self.language = ('fr', 'de') #Edit to Change Default Languages
+        self.all_languages = ['cs', 'de', 'es', 'fi', 'fr', 'hu', 'pl', 'pt-pt', 'pt', 'ru', 'zh-Hans', 'zh-Hant'] #Edit to Change Supported Languages
         self.directories = { # Edit to Change Default Directories that Store resx Files
             'business': '/Business/GlobalResources',
             'web':'/SpiraTest/App_GlobalResources',
@@ -63,61 +67,89 @@ def export_language(language):
     #Deletes Temporary File
     shutil.rmtree(f'{dir_path}/Design/Localization/Spira-{language}')
     
-    #Logs Language Saved
-    print(f'{language} saved')
+    #Logs Language Exported
+    print(f'{language} Exported')
     
-    
+#Function to save and overwrite current resx files with new ones from zip files
 def save_language(language):
+    '''
+    language: language selected by the user
+    language zip files should be in the same directory as the python script (Design/Localization)
+    '''
+    #Checking if the language file is in the same directory as the 
     if os.path.isfile(f'{script_path}/Spira-{language}.zip'):
+        #making folder to store zip file & moving zip file & unzipping the file
         os.mkdir(f'{script_path}/Spira-{language}')
         shutil.move(f'Spira-{language}.zip',f'{script_path}/Spira-{language}')
         shutil.unpack_archive(f'{script_path}/Spira-{language}/Spira-{language}.zip',f'{script_path}/Spira-{language}')
+        
+        #looping through all files of a language folder (unzipped)
+        for file in os.listdir(f'{script_path}/Spira-{language}'):
+            #matching name using regex
+            if re.match(r"\w+\." + language + "\.resx", file):
+                
+                for prefix, directory in ds.directories.items():
+                    if prefix in file:
+                        #renaming the file (getting rid of prefix)
+                        new_name = file.replace(f'{prefix}_','')
+                        os.rename(f'{script_path}/Spira-{language}/{file}',f'{script_path}/Spira-{language}/{new_name}')
+                        #overwriting the original file
+                        if os.path.isfile(f'{dir_path}/{directory}/{new_name}'):
+                            os.remove(f'{dir_path}/{directory}/{new_name}')
+                        shutil.move(f'{script_path}/Spira-{language}/{new_name}',f'{dir_path}/{directory}')
+
+        #deleting unzipped folder
+        shutil.rmtree(f'{script_path}/Spira-{language}')
+        print(f'{language} Saved')
             
     else: 
+        #if zip file is not found, this prints
         print(f'Language file not found, Spira-{language}.zip missing')
             
-    for file in os.listdir(f'{script_path}/Spira-{language}'):
-        if re.match(r"\w+\." + language + "\.resx", file):
-            for directory in ds.directories.items():
-                if directory[0] in file:
-                    new_name = file.replace(f'{directory[0]}_','')
-                    os.rename(f'{script_path}/Spira-{language}/{file}',f'{script_path}/Spira-{language}/{new_name}')
-                    if os.path.isfile(f'{dir_path}/{directory[1]}/{new_name}'):
-                        print(f'Overwritten {new_name} in {dir_path}/{directory[1]}')
-                        os.remove(f'{dir_path}/{directory[1]}/{new_name}')
-                    shutil.move(f'{script_path}/Spira-{language}/{new_name}',f'{dir_path}/{directory[1]}')
-
-    shutil.rmtree(f'{script_path}/Spira-{language}')
-            
-
-
-if __name__ == '__main__':
-
-    possible_languages = ['cs', 'de', 'es', 'fi', 'fr', 'hu', 'pl', 'pt-pt', 'pt', 'ru', 'zh-Hans', 'zh-Hant']
+#function that allows the using to choose a language
+def choose_language():
     user_language = 'lorem'
     #checking if user's choice of languages are valid
-    while user_language not in possible_languages and not set(user_language).issubset(set(possible_languages)) and not '':
-        user_language = input(f'Press Enter to Bundle Default Languages:{ds.language}, or manually enter *separate using commas  \nLanguage: {possible_languages}\n')
+    while user_language not in ds.all_languages and not set(user_language).issubset(set(ds.all_languages)) and not '':
+        user_language = input(f'Press Enter to Choose Default Languages:{ds.language}, or manually enter *separate using commas  \nLanguage: {ds.all_languages}\n')
 
         #If User does not enter anything, default language selections are saved
         if user_language == '':
             user_language = ds.language
-            break
         
         #splitting up user input into a list and removing commas
         elif ',' in user_language:
             while ' ' in user_language:
                 user_language = user_language.replace(' ','')
             user_language = user_language.split(',')
-
-    #Checking if multiple languages need to be bundled
-    if type(user_language) == list or type(user_language) == tuple:
-        for language in user_language:
-            export_language(language)
-    
-    else: 
-        export_language(user_language)
         
+    return user_language
+
+
+if __name__ == '__main__':
     
-   
-    save_language(user_language)
+    #using chooses whether to save or to export
+    user_choice = 'wrong'
+    while user_choice != 'save' and user_choice != 'export':
+        user_choice = input('Save or Export Files? Enter "save" or "export"\n').lower()
+        
+    user_language = choose_language()
+    
+    if user_choice == 'export':
+        #Checking if multiple languages need to be bundled
+        if type(user_language) == list or type(user_language) == tuple:
+            for language in user_language:
+                export_language(language)
+    
+        else: 
+            export_language(user_language)
+        
+        
+    if user_choice == 'save':
+        #Checking if multiple languages need to be saved
+        if type(user_language) == list or type(user_language) == tuple:
+            for language in user_language:
+                save_language(language)
+    
+        else: 
+            save_language(user_language)
