@@ -1,12 +1,18 @@
 '''
 This Python Script should be in the directory of SpiraTeam/Design/Localization
 '''
-#importing Regex (Part of Standard Libraries)
+#importing Regex (Part of Standard Libraries) to check file names
 import re
 
-#importing Shell Utilities & OS Module (Part of Standard Libraries)
+#importing Shell Utilities & OS Module (Part of Standard Libraries) to move
 import shutil
 import os
+
+#importing sys (Part of Standard Libraries) to take in command line calls
+import sys
+
+#importing bs4 (Not Part of Standard Libraries) to read & write resx files
+from bs4 import BeautifulSoup   #To Install on command line:  pip install beautifulsoup4
 
 #Script is located in SpiraTeam/Design/Localization
 #Goes up 2 directories to access the SpiraTeam directory
@@ -17,6 +23,7 @@ dir_path = os.path.abspath(os.path.join(sub_path, os.pardir)) #SpiraTeam Directo
 #Default Configuration Class
 class default_config:
     def __init__(self): 
+        self.languagesUpdate = ('es', 'pt') #Edit to change languages to update
         self.language = ('fr', 'de') #Edit to Change Default Languages
         self.all_languages = ['cs', 'de', 'es', 'fi', 'fr', 'hu', 'pl', 'pt-pt', 'pt', 'ru', 'zh-Hans', 'zh-Hant'] #Edit to Change Supported Languages
         self.directories = { # Edit to Change Default Directories that Store resx Files
@@ -54,10 +61,10 @@ def export_language(language):
     os.mkdir(f'{dir_path}/Design/Localization/Spira-{language}')
     
     #Loops through all key-value pairs for default file paths
-    for directory in ds.directories.items():
-        for files in os.listdir(f'{dir_path}/{directory[1]}'):
+    for prefix, directory in ds.directories.items():
+        for files in os.listdir(f'{dir_path}/{directory}'):
             #saves files to to a temporary folder in Design/Localization
-            copy_files(language,directory[1],directory[0],files)
+            copy_files(language,directory,prefix,files)
 
     #Zips the temporary folder (moves if not in right folder) and deletes the temporary folder
     if os.path.isfile(f'{dir_path}/Design/Localization/Spira-{language}.zip'):
@@ -70,8 +77,8 @@ def export_language(language):
     #Logs Language Exported
     print(f'{language} Exported')
     
-#Function to save and overwrite current resx files with new ones from zip files
-def save_language(language):
+#Function to import and overwrite current resx files with new ones from zip files
+def import_language(language):
     '''
     language: language selected by the user
     language zip files should be in the same directory as the python script (Design/Localization)
@@ -88,7 +95,9 @@ def save_language(language):
             #matching name using regex
             if re.match(r"\w+\." + language + "\.resx", file):
                 
+                #Loops through all key-value pairs for default file paths
                 for prefix, directory in ds.directories.items():
+                    #checking if prefix matches the file name
                     if prefix in file:
                         #renaming the file (getting rid of prefix)
                         new_name = file.replace(f'{prefix}_','')
@@ -100,7 +109,7 @@ def save_language(language):
 
         #deleting unzipped folder
         shutil.rmtree(f'{script_path}/Spira-{language}')
-        print(f'{language} Saved')
+        print(f'{language} Imported')
             
     else: 
         #if zip file is not found, this prints
@@ -128,28 +137,64 @@ def choose_language():
 
 if __name__ == '__main__':
     
-    #using chooses whether to save or to export
-    user_choice = 'wrong'
-    while user_choice != 'save' and user_choice != 'export':
-        user_choice = input('Save or Export Files? Enter "save" or "export"\n').lower()
+    '''
+    Command line calls:
+    To prompt user inputs:    python bundler-for-automation.py 
+    To automatically export default languages:    python bundler-for-automation.py --export 
+    To automatically import default languages:    python bundler-for-automation.py --import 
+    '''
+    if len(sys.argv) == 2: #checking if additional argument is passed in command line call
         
-    user_language = choose_language()
-    
-    if user_choice == 'export':
-        #Checking if multiple languages need to be bundled
-        if type(user_language) == list or type(user_language) == tuple:
-            for language in user_language:
+        #exports all default languages
+        if sys.argv[1].lower() == '--export':
+            for language in ds.language:
                 export_language(language)
-    
-        else: 
-            export_language(user_language)
         
+        #imports all default languages
+        elif sys.argv[1].lower() == '--import':
+            for language in ds.language:
+                import_language(language)
+                
+        #updates current languages
+        elif sys.argv[1].lower() == '--update':
+            with open('Buttons1.es.resx','r') as f:
+                data = f.read()
+            Bs_data = BeautifulSoup(data, "xml")
+            Bs_data = list(Bs_data.findAll('data'))
+            my_data = []
+            for element in Bs_data:
+                my_data.append(str(element))
+            print(my_data[144])
+            print(re.search(r'name="\w+"',my_data[144]).string)
+            print(my_data[144][6:25])
+                
+        #prints this is argument is invalid      
+        else:
+            print('Argument not valid')
         
-    if user_choice == 'save':
-        #Checking if multiple languages need to be saved
-        if type(user_language) == list or type(user_language) == tuple:
-            for language in user_language:
-                save_language(language)
-    
-        else: 
-            save_language(user_language)
+    else:
+        #using chooses whether to import or to export
+        user_choice = 'wrong'
+        while user_choice != 'import' and user_choice != 'export':
+            user_choice = input('Import or Export Files? Enter "import" or "export"\n').lower()
+            
+        user_language = choose_language()
+        
+        if user_choice == 'export':
+            #Checking if multiple languages need to be bundled
+            if type(user_language) == list or type(user_language) == tuple:
+                for language in user_language:
+                    export_language(language)
+        
+            else: 
+                export_language(user_language)
+            
+            
+        if user_choice == 'import':
+            #Checking if multiple languages need to be imported
+            if type(user_language) == list or type(user_language) == tuple:
+                for language in user_language:
+                    import_language(language)
+        
+            else: 
+                import_language(user_language)
