@@ -259,7 +259,8 @@ if __name__ == '__main__':
                                 add_string = str(eng_dict[key])
                                 temp_value = re.search(r'<value>[\s\S]*</value>',add_string).span()
                                 temp_string = add_string[temp_value[0]:temp_value[1]]
-                                add_string = add_string.replace(temp_string,f'<value>QQQ-{temp_string}</value>') #adding QQQ to mark missing
+                                #print(f'Adding {key} to {lang_file_name}') # testing purposes
+                                add_string = add_string.replace(temp_string,f'<value>QQQ-{temp_string[7:-8]}</value>') #adding QQQ to mark missing
                                 add_string = add_string+'\n'
                                 
                                 #adding to language resx file
