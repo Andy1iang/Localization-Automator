@@ -29,7 +29,7 @@ class default_config:
     def __init__(self): 
         self.languages_update = ('es', 'pt') #Edit to change languages to update
         self.language = ('fr', 'de') #Edit to Change Default Languages
-        self.all_languages = ['cs', 'de', 'es', 'fi', 'fr', 'hu', 'pl', 'pt-pt', 'pt', 'ru', 'zh-Hans', 'zh-Hant'] #Edit to Change Supported Languages
+        self.all_languages = ('cs', 'de', 'es', 'fi', 'fr', 'hu', 'pl', 'pt-pt', 'pt', 'ru', 'zh-Hans', 'zh-Hant') #Edit to Change Supported Languages
         self.directories = { # Edit to Change Default Directories that Store resx Files
             'business': '/Business/GlobalResources',
             'web':'/SpiraTest/App_GlobalResources',
