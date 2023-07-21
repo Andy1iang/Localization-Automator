@@ -18,3 +18,19 @@ To run the script:
    To automatically export the default languages: python bundler-for-automation.py --export
    To automatically import the default languages: python bundler-for-automation.py --import
    To automatically update the default langauges(for update): python bundler-for-automation.py --update
+
+Outputs:
+*All exported files will be in the same Directory as the script (SpiraTeam/Design/Localization)
+*All updated resx files will overwrite previous ones in their original locations
+*All temporary files will be deleted automatically
+
+Configurations:
+To edit default configurations, edit the variable fields in default_configs class
+self.languages_update: tuple(immutable array) determines the default languages to be updated
+self.language: tuple(immutable array) determines the default languages to be imported and/or exported
+self.all_languages: tuple(immutable array) determines all languages that are supported
+self.dictionaries: dictionary(key-value pairs) determines the prefix of resx files and its file path
+
+
+
+
