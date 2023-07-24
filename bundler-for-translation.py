@@ -29,7 +29,7 @@ class default_config:
     def __init__(self): 
         self.languages_update = ('es', 'pt') #Edit to change languages to update
         self.language = ('fr', 'de') #Edit to Change Default Languages
-        self.all_languages = ('cs', 'de', 'es', 'fi', 'fr', 'hu', 'pl', 'pt-pt', 'pt', 'ru', 'zh-Hans', 'zh-Hant') #Edit to Change Supported Languages
+        self.all_languages = ['cs', 'de', 'es', 'fi', 'fr', 'hu', 'pl', 'pt-pt', 'pt', 'ru', 'zh-Hans', 'zh-Hant'] #Edit to Change Supported Languages
         self.directories = { # Edit to Change Default Directories that Store resx Files
             'business': '/Business/GlobalResources',
             'web':'/SpiraTest/App_GlobalResources',
@@ -259,13 +259,17 @@ if __name__ == '__main__':
                                 add_string = str(eng_dict[key])
                                 temp_value = re.search(r'<value>[\s\S]*</value>',add_string).span()
                                 temp_string = add_string[temp_value[0]:temp_value[1]]
-                                #print(f'Adding {key} to {lang_file_name}') # testing purposes
-                                add_string = add_string.replace(temp_string,f'<value>QQQ-{temp_string[7:-8]}</value>') #adding QQQ to mark missing
-                                add_string = add_string+'\n'
+                                
+                                #formatting the string
+                                #subString from 7 to -8 is the value without "<value> tag"
+                                add_string = add_string.replace(temp_string,f'    <value>QQQ {temp_string[7:-8]}</value>') #adding QQQ to mark missing
+                                add_string = add_string.replace("</data>", "  </data>\n")
+                                add_string = add_string.replace("<data", "  <data")
                                 
                                 #adding to language resx file
                                 add_string = ET.fromstring(add_string)
                                 lang_root.append(add_string)
+                                
                         #writing to resx file
                         lang_tree.write(f'{script_path}/Spira-{language}/{lang_file_name}')
                 
