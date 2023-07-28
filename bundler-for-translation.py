@@ -49,7 +49,8 @@ def copy_files(language, sub_file_path, file_type, file_name):
     '''
     if re.match(r"^[^.]*.resx[^.]*$", file_name) or re.match(r"\w+\." + language + "\.resx", file_name):
         shutil.copyfile(f'{dir_path}{sub_file_path}/{file_name}', f'{file_type}_{file_name}')
-        shutil.move(f'{file_type}_{file_name}',f'{dir_path}/Design/Localization/Spira-{language}')
+        shutil.move(f'{file_type}_{file_name}',f'{script_path}/Spira-{language}')
+        
         
 #Function Create New Zip File with English and Chosen Language resx Files
 def export_language(language):
@@ -57,12 +58,12 @@ def export_language(language):
     language: language selected by the user
     '''
     #Checking a File with name of Spira-'language' exists, deletes if it is
-    if os.path.exists(f'{dir_path}/Design/Localization/Spira-{language}'):
+    if os.path.exists(f'{script_path}/Spira-{language}'):
         print('File Exists, Overwriting File')
-        shutil.rmtree(f'{dir_path}/Design/Localization/Spira-{language}')
+        shutil.rmtree(f'{script_path}/Spira-{language}')
 
     #Creates new temporary folder to hold resx files
-    os.mkdir(f'{dir_path}/Design/Localization/Spira-{language}')
+    os.mkdir(f'{script_path}/Spira-{language}')
     
     #Loops through all key-value pairs for default file paths
     for prefix, directory in ds.directories.items():
@@ -71,12 +72,12 @@ def export_language(language):
             copy_files(language,directory,prefix,files)
 
     #Zips the temporary folder (moves if not in right folder) and deletes the temporary folder
-    if os.path.isfile(f'{dir_path}/Design/Localization/Spira-{language}.zip'):
-        os.remove(f'{dir_path}/Design/Localization/Spira-{language}.zip')
+    if os.path.isfile(f'{script_path}/Spira-{language}.zip'):
+        os.remove(f'{script_path}/Spira-{language}.zip')
     shutil.make_archive(f'Spira-{language}', format='zip', root_dir=dir_path+'/Design/Localization/Spira-'+language)
     
     #Deletes Temporary File
-    shutil.rmtree(f'{dir_path}/Design/Localization/Spira-{language}')
+    shutil.rmtree(f'{script_path}/Spira-{language}')
     
     #Logs Language Exported
     print(f'{language} Exported')
@@ -94,8 +95,14 @@ def import_language(language):
         shutil.move(f'Spira-{language}.zip',f'{script_path}/Spira-{language}')
         shutil.unpack_archive(f'{script_path}/Spira-{language}/Spira-{language}.zip',f'{script_path}/Spira-{language}')
         
+        if f'Spira-{language}' in os.listdir(f'{script_path}/Spira-{language}'):
+            extra_path = f'/Spira-{language}/Spira-{language}'
+        elif f'Spira-{language}' not in os.listdir(f'{script_path}/Spira-{language}'):
+            extra_path = f'/Spira-{language}'
+            
+        
         #looping through all files of a language folder (unzipped)
-        for file in os.listdir(f'{script_path}/Spira-{language}/Spira-{language}'):
+        for file in os.listdir(f'{script_path}{extra_path}'):
             
             #matching name using regex
             if re.match(r"\w+\." + language + "\.resx", file):
@@ -106,11 +113,11 @@ def import_language(language):
                     if prefix in file:
                         #renaming the file (getting rid of prefix)
                         new_name = file.replace(f'{prefix}_','')
-                        os.rename(f'{script_path}/Spira-{language}/Spira-{language}/{file}',f'{script_path}/Spira-{language}/Spira-{language}/{new_name}')
+                        os.rename(f'{script_path}{extra_path}/{file}',f'{script_path}{extra_path}/{new_name}')
                         #overwriting the original file
                         if os.path.isfile(f'{dir_path}/{directory}/{new_name}'):
                             os.remove(f'{dir_path}/{directory}/{new_name}')
-                        shutil.move(f'{script_path}/Spira-{language}/Spira-{language}/{new_name}',f'{dir_path}{directory}/{new_name}')
+                        shutil.move(f'{script_path}{extra_path}/{new_name}',f'{dir_path}{directory}/{new_name}')
                         
 
         #deleting unzipped folder
@@ -127,15 +134,15 @@ def bundle_language(language):
     language: language selected by the user
     '''
     #Checking a File with name of Spira-'language' exists, deletes if it is
-    if os.path.exists(f'{dir_path}/Design/Localization/Spira-{language}'):
-        shutil.rmtree(f'{dir_path}/Design/Localization/Spira-{language}')
+    if os.path.exists(f'{script_path}/Spira-{language}'):
+        shutil.rmtree(f'{script_path}/Spira-{language}')
 
     #Creates new temporary folder to hold resx files
-    os.mkdir(f'{dir_path}/Design/Localization/Spira-{language}')
+    os.mkdir(f'{script_path}/Spira-{language}')
     
     #Loops through all key-value pairs for default file paths
     for prefix, directory in ds.directories.items():
-        for files in os.listdir(f'{dir_path}/{directory}'):
+        for files in os.listdir(f'{dir_path}{directory}'):
             #saves files to to a temporary folder in Design/Localization
             copy_files(language,directory,prefix,files)
             
@@ -188,24 +195,22 @@ def save_update(language):
     '''
     language: user's choice of language
     '''
-    for file in os.listdir(f'{script_path}/Spira-{language}'):
-        #matching name using regex
-        if re.match(r"\w+\." + language + "\.resx", file):
-                
-            #Loops through all key-value pairs for default file paths
-            for prefix, directory in ds.directories.items():
-                #checking if prefix matches the file name
-                if prefix in file:
-                    #renaming the file (getting rid of prefix)
-                    new_name = file.replace(f'{prefix}_','')
-                    os.rename(f'{script_path}/Spira-{language}/{file}',f'{script_path}/Spira-{language}/{new_name}')
-                    #overwriting the original file
-                    if os.path.isfile(f'{dir_path}/{directory}/{new_name}'):
-                        os.remove(f'{dir_path}/{directory}/{new_name}')
-                    shutil.move(f'{script_path}/Spira-{language}/{new_name}',f'{dir_path}{directory}')
+    for file in os.listdir(f'{script_path}/QQQ-Spira-{language}'):
+
+        #Loops through all key-value pairs for default file paths
+        for prefix, directory in ds.directories.items():
+            #checking if prefix matches the file name
+            if prefix in file:
+                #renaming the file (getting rid of prefix)
+                new_name = file.replace(f'{prefix}_','')
+                os.rename(f'{script_path}/QQQ-Spira-{language}/{file}',f'{script_path}/QQQ-Spira-{language}/{new_name}')
+                #overwriting the original file
+                if os.path.isfile(f'{dir_path}/{directory}/{new_name}'):
+                    os.remove(f'{dir_path}/{directory}/{new_name}')
+                shutil.move(f'{script_path}/QQQ-Spira-{language}/{new_name}',f'{dir_path}{directory}')
 
     #deleting temp folder
-    shutil.rmtree(f'{script_path}/Spira-{language}')
+    shutil.rmtree(f'{script_path}/QQQ-Spira-{language}')
 
 
 if __name__ == '__main__':
@@ -228,14 +233,24 @@ if __name__ == '__main__':
             for language in ds.language:
                 import_language(language)
                 
-        #updates missing data to language files
-        elif sys.argv[1].lower() == '--update':
+        else:
+            print('Argument not valid')
+        
+        
+    
+    #updates missing data to language files
+    elif len(sys.argv) == 3 and sys.argv[1].lower() == '--update':
+        
+        if sys.argv[2].lower() == '--export':
             
             for language in ds.languages_update:
+                os.mkdir(f'QQQ-Spira-{language}')
                 
                 bundle_language(language) #getting language files 
+                QQQ_files = []
                 
                 for file_name in os.listdir(f'{script_path}/Spira-{language}'):
+                    QQQ_bool = False
                     #matching all files that are primary (english) files
                     if re.match(r"^[^.]*.resx[^.]*$", file_name):
                         
@@ -266,26 +281,34 @@ if __name__ == '__main__':
                                 #subString from 7 to -8 is the value without "<value> tag"
                                 add_string = add_string.replace(temp_string,f'    <value>QQQ {temp_string[7:-8]}</value>') #adding QQQ to mark missing
                                 add_string = add_string.replace("</data>", "  </data>\n")
-                                add_string = add_string.replace("<data", "  <data")
+                                add_string = add_string.replace("<data", "\n  <data")
                                 
                                 #adding to language resx file
                                 add_string = ET.fromstring(add_string)
                                 lang_root.append(add_string)
+                                QQQ_bool = True
                                 
                         #writing to resx file
                         lang_tree.write(f'{script_path}/Spira-{language}/{lang_file_name}')
+                        
+                        
+                        
+                        if QQQ_bool:
+                            shutil.move(f'{script_path}/Spira-{language}/{lang_file_name}',f'{script_path}/QQQ-Spira-{language}')
+                            
                 
-                #moving updated files back to original location (language only)    
+                shutil.rmtree(f'{script_path}/Spira-{language}')
+                print(f'{language} Update Exported')
+        
+        elif sys.argv[2].lower() == '--import':
+            for language in ds.languages_update:
                 save_update(language)
-
-                #logging finished process
-                print(f'{language} Updated')
-                    
-                
+                print(f'{language} Update Imported')
+                        
         #prints this is argument is invalid      
         else:
             print('Argument not valid')
-        
+            
     else:
         #using chooses whether to import or to export
         user_choice = 'wrong'
