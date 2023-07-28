@@ -95,7 +95,8 @@ def import_language(language):
         shutil.unpack_archive(f'{script_path}/Spira-{language}/Spira-{language}.zip',f'{script_path}/Spira-{language}')
         
         #looping through all files of a language folder (unzipped)
-        for file in os.listdir(f'{script_path}/Spira-{language}'):
+        for file in os.listdir(f'{script_path}/Spira-{language}/Spira-{language}'):
+            
             #matching name using regex
             if re.match(r"\w+\." + language + "\.resx", file):
                 
@@ -105,11 +106,12 @@ def import_language(language):
                     if prefix in file:
                         #renaming the file (getting rid of prefix)
                         new_name = file.replace(f'{prefix}_','')
-                        os.rename(f'{script_path}/Spira-{language}/{file}',f'{script_path}/Spira-{language}/{new_name}')
+                        os.rename(f'{script_path}/Spira-{language}/Spira-{language}/{file}',f'{script_path}/Spira-{language}/Spira-{language}/{new_name}')
                         #overwriting the original file
                         if os.path.isfile(f'{dir_path}/{directory}/{new_name}'):
                             os.remove(f'{dir_path}/{directory}/{new_name}')
-                        shutil.move(f'{script_path}/Spira-{language}/{new_name}',f'{dir_path}/{directory}')
+                        shutil.move(f'{script_path}/Spira-{language}/Spira-{language}/{new_name}',f'{dir_path}{directory}/{new_name}')
+                        
 
         #deleting unzipped folder
         shutil.rmtree(f'{script_path}/Spira-{language}')
@@ -164,7 +166,7 @@ def make_dictionary(language,file_name):
     language: user's choice of language
     file_name: file name to be read from (resx)
     '''
-    with open(f'{script_path}/Spira-{language}/{file_name}','r') as f:
+    with open(f'{script_path}/Spira-{language}/{file_name}','r',encoding= 'utf-8') as f:
         data = f.read() #reading the file
         
         #making beautifulsoup data into a list
@@ -200,7 +202,7 @@ def save_update(language):
                     #overwriting the original file
                     if os.path.isfile(f'{dir_path}/{directory}/{new_name}'):
                         os.remove(f'{dir_path}/{directory}/{new_name}')
-                    shutil.move(f'{script_path}/Spira-{language}/{new_name}',f'{dir_path}/{directory}')
+                    shutil.move(f'{script_path}/Spira-{language}/{new_name}',f'{dir_path}{directory}')
 
     #deleting temp folder
     shutil.rmtree(f'{script_path}/Spira-{language}')
