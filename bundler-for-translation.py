@@ -129,7 +129,7 @@ def import_language(language):
         print(f'Language file not found, Spira-{language}.zip missing')
 
 #helper function to copy primary and language files to script directory
-def bundle_language(language):
+def update_export(language):
     '''
     language: language selected by the user
     '''
@@ -146,7 +146,30 @@ def bundle_language(language):
             #saves files to to a temporary folder in Design/Localization
             copy_files(language,directory,prefix,files)
             
-    
+
+#helper function to save the updated resx files back to original location
+def update_import(language):
+    '''
+    language: user's choice of language
+    '''
+    #Going through all files in QQQ (changed) language folder
+    for file in os.listdir(f'{script_path}/QQQ-Spira-{language}'):
+
+        #Loops through all key-value pairs for default file paths
+        for prefix, directory in ds.directories.items():
+            #checking if prefix matches the file name
+            if prefix in file:
+                #renaming the file (getting rid of prefix)
+                new_name = file.replace(f'{prefix}_','')
+                os.rename(f'{script_path}/QQQ-Spira-{language}/{file}',f'{script_path}/QQQ-Spira-{language}/{new_name}')
+                #overwriting the original file
+                if os.path.isfile(f'{dir_path}/{directory}/{new_name}'):
+                    os.remove(f'{dir_path}/{directory}/{new_name}')
+                shutil.move(f'{script_path}/QQQ-Spira-{language}/{new_name}',f'{dir_path}{directory}')
+
+    #deleting temp folder
+    shutil.rmtree(f'{script_path}/QQQ-Spira-{language}')
+
             
 #function that allows the using to choose a language
 def choose_language():
@@ -190,27 +213,6 @@ def make_dictionary(language,file_name):
             
     return data_dict
 
-#helper function to save the updated resx files back to original location
-def save_update(language):
-    '''
-    language: user's choice of language
-    '''
-    for file in os.listdir(f'{script_path}/QQQ-Spira-{language}'):
-
-        #Loops through all key-value pairs for default file paths
-        for prefix, directory in ds.directories.items():
-            #checking if prefix matches the file name
-            if prefix in file:
-                #renaming the file (getting rid of prefix)
-                new_name = file.replace(f'{prefix}_','')
-                os.rename(f'{script_path}/QQQ-Spira-{language}/{file}',f'{script_path}/QQQ-Spira-{language}/{new_name}')
-                #overwriting the original file
-                if os.path.isfile(f'{dir_path}/{directory}/{new_name}'):
-                    os.remove(f'{dir_path}/{directory}/{new_name}')
-                shutil.move(f'{script_path}/QQQ-Spira-{language}/{new_name}',f'{dir_path}{directory}')
-
-    #deleting temp folder
-    shutil.rmtree(f'{script_path}/QQQ-Spira-{language}')
 
 
 if __name__ == '__main__':
@@ -220,8 +222,11 @@ if __name__ == '__main__':
     To prompt user inputs:    python bundler-for-automation.py 
     To automatically export default languages:    python bundler-for-automation.py --export 
     To automatically import default languages:    python bundler-for-automation.py --import 
+    To automatically update(export) languages:    python bundler-for-automation.py --update --export
+    To automatically update(import) languages:    python bundler-for-automation.py --update --import
     '''
-    if len(sys.argv) == 2: #checking if additional argument is passed in command line call
+    
+    if len(sys.argv) == 2: #checking if one additional argument is passed in command line call (export&import)
         
         #exports all default languages
         if sys.argv[1].lower() == '--export':
@@ -236,21 +241,19 @@ if __name__ == '__main__':
         else:
             print('Argument not valid')
         
+    elif len(sys.argv) == 3 and sys.argv[1].lower() == '--update': #checking if two additional argument are passed in to update
         
-    
-    #updates missing data to language files
-    elif len(sys.argv) == 3 and sys.argv[1].lower() == '--update':
-        
-        if sys.argv[2].lower() == '--export':
+        if sys.argv[2].lower() == '--export': #checking if user wants to update export
             
             for language in ds.languages_update:
-                os.mkdir(f'QQQ-Spira-{language}')
+                os.mkdir(f'QQQ-Spira-{language}') #making folder to store all changed language files
                 
-                bundle_language(language) #getting language files 
+                update_export(language) #getting language files 
                 QQQ_files = []
                 
                 for file_name in os.listdir(f'{script_path}/Spira-{language}'):
-                    QQQ_bool = False
+                    QQQ_bool = False #boolean to check if file has been changed
+                    
                     #matching all files that are primary (english) files
                     if re.match(r"^[^.]*.resx[^.]*$", file_name):
                         
@@ -286,23 +289,22 @@ if __name__ == '__main__':
                                 #adding to language resx file
                                 add_string = ET.fromstring(add_string)
                                 lang_root.append(add_string)
-                                QQQ_bool = True
+                                QQQ_bool = True #show file has been changed
                                 
                         #writing to resx file
                         lang_tree.write(f'{script_path}/Spira-{language}/{lang_file_name}')
                         
                         
-                        
-                        if QQQ_bool:
+                        if QQQ_bool: #moves file to QQQ folder if it has been changed
                             shutil.move(f'{script_path}/Spira-{language}/{lang_file_name}',f'{script_path}/QQQ-Spira-{language}')
                             
-                
+                #deleted temporary language folder
                 shutil.rmtree(f'{script_path}/Spira-{language}')
                 print(f'{language} Update Exported')
         
-        elif sys.argv[2].lower() == '--import':
+        elif sys.argv[2].lower() == '--import': #checking if user wants to update import
             for language in ds.languages_update:
-                save_update(language)
+                update_import(language) #saving changed files back to original location
                 print(f'{language} Update Imported')
                         
         #prints this is argument is invalid      
