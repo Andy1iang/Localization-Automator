@@ -2,7 +2,7 @@
 bundler-for-translation is a python script with 3 functionalities
 1. Export all resx files of a certain language
 2. Import language files of a langauge (from zip file)
-3. Updating language (resx) files and adding missing data (export & import functionalities)
+3. Updating language (resx) files and adding missing data (export & import functionalities are separate) 
 
 <b>*Before running this script, make sure it is located in the SpiraTeam/Design/Localization directory<br>
 *If the importing feature will be used, make sure the zip files are also located in the SpiraTeam/Design/Localization directory<br>
@@ -19,7 +19,8 @@ To run the script:
 <ul>To automatically import the default languages: python bundler-for-automation.py --import</ul>
 <ul>To automatically update the default langauges: 
    <br>----- To update files and export to 'QQQ' Folder: python bundler-for-automation.py --update --export
-   <br>----- To import files from 'QQQ' Folder after changes: lpython bundler-for-automation.py --update --import
+   <br>----- To import files from 'QQQ' Folder after changes: python bundler-for-automation.py --update --import
+   <br>&ensp;&ensp;&ensp;&ensp;&ensp;----- Directly change files in the 'QQQ Folder' before importing (for update)
 </ul>
 <br>
 Outputs:
